@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: transparent; color: white; font-family: sans-serif; overflow: hidden; }
+        /* כאן תשים את ה-CSS של האנימציה הספציפית */
+        .spinner { /* ... */ }
+        #percent { margin-top: 10px; font-weight: bold; color: #00d4ff; display: none; }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div> <div id="percent">0%</div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('showPercent')) {
+            const p = document.getElementById('percent');
+            p.style.display = 'block';
+            let val = 0;
+            const interval = setInterval(() => {
+                val++;
+                p.textContent = val + '%';
+                if (val >= 100) clearInterval(interval);
+            }, 30);
+        }
+    </script>
+</body>
+</html>
