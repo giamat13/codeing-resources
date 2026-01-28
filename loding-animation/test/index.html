@@ -109,15 +109,12 @@
         try {
             const response = await fetch(url, { method: 'HEAD' });
             return response.ok;
-        } catch {
-            return false;
-        }
+        } catch { return false; }
     }
 
     async function init() {
         const grid = document.getElementById('loaders-grid');
-        grid.innerHTML = ''; // ניקוי הגריד לפני טעינה
-
+        
         for (const name of loadersList) {
             const card = document.createElement('div');
             card.className = 'loader-card';
@@ -130,14 +127,14 @@
             let isHtml = false;
 
             if (await checkFileExists(htmlPath)) {
-                previewHtml = `<iframe src="${htmlPath}" id="frame-${name}"></iframe>`;
+                previewHtml = `<iframe src="${htmlPath}" id="frame-${name}" scrolling="no"></iframe>`;
                 finalPath = htmlPath;
                 isHtml = true;
             } else if (await checkFileExists(gifPath)) {
                 previewHtml = `<img src="${gifPath}" alt="${name}">`;
                 finalPath = gifPath;
             } else {
-                previewHtml = `<div style="color:red; font-size:12px;">קובץ לא נמצא (${name})</div>`;
+                previewHtml = `<div style="color:red; font-size:12px;">קובץ לא נמצא</div>`;
             }
 
             card.innerHTML = `
@@ -158,37 +155,61 @@
         }
     }
 
-    function updateLoader(name, checkbox) {
-        const iframe = document.getElementById(`frame-${name}`);
-        if (!iframe) return;
-        
-        try {
-            const url = new URL(iframe.src, window.location.origin);
-            if (checkbox.checked) {
-                url.searchParams.set('showPercent', 'true');
-            } else {
-                url.searchParams.delete('showPercent');
-            }
-            iframe.src = url.toString();
-        } catch (e) {
-            console.error("Error updating iframe URL", e);
-        }
-    }
+function updateLoader(name, checkbox) {
+    const iframe = document.getElementById(`frame-${name}`);
+    if (!iframe) return;
 
-    async function copyCode(path) {
-        try {
-            const response = await fetch(path);
-            if (!response.ok) throw new Error();
-            const text = await response.text();
-            await navigator.clipboard.writeText(text);
-            alert('הקוד הועתק ללוח!');
-        } catch (err) {
-            alert('שגיאה בהעתקת הקוד. וודא שהקובץ קיים בשרת.');
-        }
+    const show = checkbox.checked;
+
+    // הזרקת סקריפט לתוך ה-iframe לניהול האחוזים
+    const injectCode = `
+        (function() {
+            let percentEl = document.getElementById('dynamic-percent');
+            
+            // אם המשתמש רוצה להציג ואין אלמנט - ניצור אחד
+            if (${show} && !percentEl) {
+                percentEl = document.createElement('div');
+                percentEl.id = 'dynamic-percent';
+                // עיצוב בסיסי שמתאים לרוב הטעינות
+                Object.assign(percentEl.style, {
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    color: '#00d4ff',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    fontFamily: 'sans-serif',
+                    zIndex: '100',
+                    pointerEvents: 'none'
+                });
+                document.body.appendChild(percentEl);
+                
+                // סימולציה של אחוזים עולים
+                let count = 0;
+                window.percentInterval = setInterval(() => {
+                    count = (count + 1) % 101;
+                    percentEl.innerText = count + '%';
+                }, 50);
+            } 
+            
+            // אם המשתמש ביטל את הצ'קבוקס - נסיר את האלמנט
+            if (!${show} && percentEl) {
+                percentEl.remove();
+                clearInterval(window.percentInterval);
+            }
+        })();
+    `;
+
+    try {
+        // הרצת הקוד בתוך ה-iframe
+        iframe.contentWindow.eval(injectCode);
+    } catch (e) {
+        console.warn("לא ניתן להזריק קוד ל-iframe (אולי בגלל אבטחה/דומיין שונה)");
     }
+}
 
     window.onload = init;
 </script>
-
 </body>
 </html>
