@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: transparent; font-family: sans-serif; }
+        .wrapper { width: 280px; }
+        .bar { width: 100%; height: 30px; background: rgba(255, 255, 255, 0.1); border-radius: 15px; overflow: hidden; }
+        .fill { height: 100%; background: linear-gradient(90deg, #00d4ff, #ff006e); width: 0%; display: flex; align-items: center; justify-content: flex-end; padding: 0 15px; transition: width 0.1s linear; }
+        .label { color: white; font-weight: 700; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper"><div class="bar"><div class="fill"><span class="label">0%</span></div></div></div>
+    <script>
+        let val = 0;
+        setInterval(() => {
+            if(val < 100) {
+                val++;
+                document.querySelector('.fill').style.width = val + '%';
+                document.querySelector('.label').textContent = val + '%';
+            }
+        }, 50);
+    </script>
+</body>
+</html>
