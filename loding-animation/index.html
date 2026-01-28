@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אנימציות טעינה - גרסה דינמית</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Rubik:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-medium: #141b3d;
+            --bg-light: #1e2749;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #ff006e;
+            --accent-tertiary: #ffbe0b;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a9d4;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        header { text-align: center; margin-bottom: 3rem; }
+        h1 { font-family: 'Rubik', sans-serif; font-size: 3.5rem; color: var(--accent-primary); margin: 0; }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 2rem; }
+
+        .loader-card {
+            background: var(--bg-medium);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--accent-tertiary);
+            cursor: pointer;
+        }
+
+        .loader-preview {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 1.5rem;
+        }
+
+        .percentage-val {
+            font-weight: 800;
+            color: var(--accent-primary);
+            font-size: 1.2rem;
+            display: none; /* מוסתר כברירת מחדל */
+        }
+
+        /* סגנון לקוד */
+        .code-block { position: relative; }
+        pre {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 8px;
+            direction: ltr;
+            text-align: left;
+            font-size: 0.8rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-primary);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* --- הגדרות האנימציות (CSS המקורי) --- */
+        .spinner-dots { display: flex; gap: 12px; }
+        .spinner-dots span { width: 18px; height: 18px; border-radius: 50%; animation: dotPulse 1.4s infinite ease-in-out; }
+        .spinner-dots span:nth-child(1) { animation-delay: -0.32s; background: var(--accent-primary); }
+        .spinner-dots span:nth-child(2) { animation-delay: -0.16s; background: var(--accent-secondary); }
+        .spinner-dots span:nth-child(3) { background: var(--accent-tertiary); }
+        @keyframes dotPulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+
+        .circular-loader { width: 60px; height: 60px; border: 5px solid rgba(0, 212, 255, 0.1); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .pulse-ring { width: 60px; height: 60px; border: 4px solid var(--accent-secondary); border-radius: 50%; animation: pulseRing 2s ease-in-out infinite; }
+        @keyframes pulseRing { 0%, 100% { transform: scale(0.8); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.5; } }
+
+        .bars-loader { display: flex; gap: 6px; align-items: flex-end; height: 50px; }
+        .bars-loader span { width: 10px; background: var(--accent-primary); animation: barsGrow 1.2s infinite ease-in-out; }
+        @keyframes barsGrow { 0%, 100% { height: 15px; } 50% { height: 50px; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>אנימציות טעינה חכמות</h1>
+    <p>בחר אנימציה והוסף אחוזים בלחיצת כפתור</p>
+</header>
+
+<div class="container">
+    <div class="grid">
+        <div class="loader-card" data-id="dots">
+            <div class="card-header">
+                <h2 class="card-title">נקודות פועמות</h2>
+                <label class="checkbox-container">
+                    <input type="checkbox" onchange="togglePercent(this, 'dots')"> הוסף אחוזים
+                </label>
+            </div>
+            <div class="loader-preview">
+                <div class="anim-target">
+                    <div class="spinner-dots"><span></span><span></span><span></span></div>
+                </div>
+                <div class="percentage-val">85%</div>
+            </div>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+                <pre><code></code></pre>
+            </div>
+        </div>
+
+        <div class="loader-card" data-id="circular">
+            <div class="card-header">
+                <h2 class="card-title">ספינר קלאסי</h2>
+                <label class="checkbox-container">
+                    <input type="checkbox" onchange="togglePercent(this, 'circular')"> הוסף אחוזים
+                </label>
+            </div>
+            <div class="loader-preview">
+                <div class="anim-target">
+                    <div class="circular-loader"></div>
+                </div>
+                <div class="percentage-val">60%</div>
+            </div>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+                <pre><code></code></pre>
+            </div>
+        </div>
+
+        <div class="loader-card" data-id="pulse">
+            <div class="card-header">
+                <h2 class="card-title">טבעת פועמת</h2>
+                <label class="checkbox-container">
+                    <input type="checkbox" onchange="togglePercent(this, 'pulse')"> הוסף אחוזים
+                </label>
+            </div>
+            <div class="loader-preview">
+                <div class="anim-target">
+                    <div class="pulse-ring"></div>
+                </div>
+                <div class="percentage-val">40%</div>
+            </div>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+                <pre><code></code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // פונקציה לעדכון התצוגה המקדימה והקוד
+    function togglePercent(checkbox, id) {
+        const card = checkbox.closest('.loader-card');
+        const percentEl = card.querySelector('.percentage-val');
+        
+        if (checkbox.checked) {
+            percentEl.style.display = 'block';
+        } else {
+            percentEl.style.display = 'none';
+        }
+        
+        updateCode(card);
+    }
+
+    // פונקציה שמייצרת את הטקסט של הקוד לפי המצב הנוכחי
+    function updateCode(card) {
+        const isChecked = card.querySelector('input[type="checkbox"]').checked;
+        const animHtml = card.querySelector('.anim-target').innerHTML.trim();
+        const codeTag = card.querySelector('code');
+        
+        let htmlSnippet = `\n<div class="loader-container">\n  ${animHtml}`;
+        
+        if (isChecked) {
+            htmlSnippet += `\n  <div class="percent">85%</div>`;
+        }
+        
+        htmlSnippet += `\n</div>`;
+        
+        // כאן ניתן להוסיף גם את ה-CSS הרלוונטי לכל סוג בתוך ה-Template
+        codeTag.textContent = htmlSnippet;
+    }
+
+    // העתקה ללוח
+    function copyCode(btn) {
+        const code = btn.nextElementSibling.innerText;
+        navigator.clipboard.writeText(code);
+        const originalText = btn.textContent;
+        btn.textContent = '✓ הועתק';
+        setTimeout(() => btn.textContent = originalText, 2000);
+    }
+
+    // הרצה ראשונית של הקוד לכל הכרטיסים
+    document.querySelectorAll('.loader-card').forEach(updateCode);
+</script>
+
+</body>
+</html>
