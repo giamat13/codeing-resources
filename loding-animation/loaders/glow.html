@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: transparent; }
+        .glowing-pulse { width: 60px; height: 60px; background: #ff006e; border-radius: 50%; position: relative; animation: gp 2s ease-in-out infinite; }
+        .glowing-pulse::before { content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border: 2px solid #ff006e; border-radius: 50%; animation: rip 2s ease-out infinite; }
+        @keyframes gp { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px #ff006e; } 50% { transform: scale(1.1); box-shadow: 0 0 40px #ff006e; } }
+        @keyframes rip { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+    </style>
+</head>
+<body><div class="glowing-pulse"></div></body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספריית אנימציות טעינה - אוטומטית</title>
+    <title>ספריית טעינה חכמה</title>
     <style>
         :root {
             --bg-dark: #0a0e27;
@@ -22,9 +22,6 @@
         }
 
         header { text-align: center; margin-bottom: 3rem; }
-        h1 { color: var(--accent); font-size: 2.5rem; margin: 0; }
-        p { color: var(--text-dim); }
-
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -48,14 +45,17 @@
             height: 180px;
             border-radius: 10px;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        iframe {
+        iframe, img {
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
+            object-fit: contain;
         }
 
         .card-info {
@@ -64,117 +64,119 @@
             align-items: center;
         }
 
-        .loader-name {
-            font-weight: bold;
-            text-transform: capitalize;
-            color: var(--text);
-        }
+        .loader-name { font-weight: bold; text-transform: capitalize; }
+        
+        .controls { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dim); cursor: pointer; }
 
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            cursor: pointer;
-        }
+        .btn-group { display: flex; gap: 8px; }
 
-        .copy-btn {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 5px 12px;
-            border-radius: 4px;
+        .btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 0.8rem;
+            font-weight: bold;
             transition: all 0.2s;
-            width: 100%;
+            text-decoration: none;
+            text-align: center;
+            border: 1px solid var(--accent);
         }
 
-        .copy-btn:hover {
-            background: var(--accent);
-            color: var(--bg-dark);
-        }
+        .btn-primary { background: var(--accent); color: var(--bg-dark); }
+        .btn-outline { background: transparent; color: var(--accent); }
+        
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Loader Library</h1>
-    <p>אוסף אנימציות בקבצים נפרדים (תיקיית loaders)</p>
+    <h1>Loader Library Pro</h1>
+    <p>תצוגת HTML או GIF באופן אוטומטי</p>
 </header>
 
-<div class="grid" id="loaders-grid">
-    </div>
+<div class="grid" id="loaders-grid"></div>
 
 <script>
-    // רשימת הקבצים בתיקיית loaders (ללא סיומת .html)
     const loadersList = [
-        'dots',
-        'circular',
-        'pulse',
-        'bars',
-        'dual-ring',
-        'bounce',
-        'square',
-        'progress',
-        'circle-percent',
-        'linear-percent',
-        'infinity',
-        'glow',
-        'typing',
-        'skeleton',
-        'text-spinner',
-        'counter'
+        'dots', 'circular', 'pulse', 'bars', 'dual-ring', 'bounce', 
+        'square', 'progress', 'circle-percent', 'linear-percent', 
+        'infinity', 'glow', 'typing', 'skeleton', 'text-spinner', 'counter'
     ];
 
-    function init() {
+    async function checkFileExists(url) {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    async function init() {
         const grid = document.getElementById('loaders-grid');
         
-        loadersList.forEach(name => {
-            const fileName = `${name}.html`;
+        for (const name of loadersList) {
             const card = document.createElement('div');
             card.className = 'loader-card';
             
+            // בדיקה איזה קובץ קיים
+            const htmlPath = `loaders/${name}.html`;
+            const gifPath = `loaders/${name}.gif`;
+            
+            let previewHtml = '';
+            let finalPath = '';
+
+            // לוגיקת החיפוש: קודם HTML, אחר כך GIF
+            if (await checkFileExists(htmlPath)) {
+                previewHtml = `<iframe src="${htmlPath}" id="frame-${name}"></iframe>`;
+                finalPath = htmlPath;
+            } else if (await checkFileExists(gifPath)) {
+                previewHtml = `<img src="${gifPath}" alt="${name}">`;
+                finalPath = gifPath;
+            } else {
+                previewHtml = `<div style="color:red; font-size:12px;">קובץ לא נמצא (${name})</div>`;
+            }
+
             card.innerHTML = `
-                <div class="preview-container">
-                    <iframe src="loaders/${fileName}" id="frame-${name}"></iframe>
-                </div>
+                <div class="preview-container">${previewHtml}</div>
                 <div class="card-info">
                     <span class="loader-name">${name.replace(/-/g, ' ')}</span>
+                    ${finalPath.endsWith('.html') ? `
                     <label class="controls">
                         <input type="checkbox" onchange="updateLoader('${name}', this)"> אחוזים
-                    </label>
+                    </label>` : ''}
                 </div>
-                <button class="copy-btn" onclick="copyPath('loaders/${fileName}')">העתק נתיב קובץ</button>
+                <div class="btn-group">
+                    <a href="${finalPath}" target="_blank" class="btn btn-primary">הכנס לקובץ</a>
+                    <button class="btn btn-outline" onclick="copyCode('${finalPath}')">העתק קוד</button>
+                </div>
             `;
-            
             grid.appendChild(card);
-        });
+        }
     }
 
     function updateLoader(name, checkbox) {
         const iframe = document.getElementById(`frame-${name}`);
-        // יצירת URL חדש כדי לא להסתבך עם מחרוזות
+        if (!iframe) return;
         const url = new URL(iframe.src);
-        
-        if (checkbox.checked) {
-            url.searchParams.set('showPercent', 'true');
-        } else {
-            url.searchParams.delete('showPercent');
-        }
-        
+        if (checkbox.checked) url.searchParams.set('showPercent', 'true');
+        else url.searchParams.delete('showPercent');
         iframe.src = url.toString();
     }
 
-    function copyPath(path) {
-        navigator.clipboard.writeText(path);
-        const originalText = event.target.textContent;
-        event.target.textContent = '✓ הועתק';
-        setTimeout(() => event.target.textContent = originalText, 2000);
+    async function copyCode(path) {
+        try {
+            const response = await fetch(path);
+            const text = await response.text();
+            await navigator.clipboard.writeText(text);
+            alert('הקוד הועתק ללוח!');
+        } catch (err) {
+            alert('שגיאה בהעתקת הקוד. וודא שהקובץ קיים.');
+        }
     }
 
-    // הפעלה ברגע שהדף נטען
     window.onload = init;
 </script>
 

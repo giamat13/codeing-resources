@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: transparent; color: white; font-family: sans-serif; }
+        .infinity-loader { width: 100px; height: 50px; position: relative; }
+        .infinity-loader::before, .infinity-loader::after { content: ''; position: absolute; width: 50px; height: 50px; border: 4px solid #00d4ff; border-radius: 50%; animation: rot 2s linear infinite; }
+        .infinity-loader::before { left: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 100%); }
+        .infinity-loader::after { right: 0; clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%); animation-direction: reverse; }
+        @keyframes rot { 100% { transform: rotate(360deg); } }
+        #p { margin-top: 15px; display: none; color: #00d4ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="infinity-loader"></div><div id="p">0%</div>
+    <script>
+        if(new URLSearchParams(window.location.search).has('showPercent')) {
+            document.getElementById('p').style.display='block';
+            let v=0; setInterval(()=>{if(v<100)v++; document.getElementById('p').textContent=v+'%';},50);
+        }
+    </script>
+</body>
+</html>
