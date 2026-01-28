@@ -161,51 +161,61 @@ function updateLoader(name, checkbox) {
 
     const show = checkbox.checked;
 
-    // הזרקת סקריפט לתוך ה-iframe לניהול האחוזים
+    // הזרקת סקריפט חכם שמתאים את עצמו לצבע ולמיקום
     const injectCode = `
         (function() {
             let percentEl = document.getElementById('dynamic-percent');
             
-            // אם המשתמש רוצה להציג ואין אלמנט - ניצור אחד
-            if (${show} && !percentEl) {
-                percentEl = document.createElement('div');
-                percentEl.id = 'dynamic-percent';
-                // עיצוב בסיסי שמתאים לרוב הטעינות
-                Object.assign(percentEl.style, {
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    color: '#00d4ff',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    fontFamily: 'sans-serif',
-                    zIndex: '100',
-                    pointerEvents: 'none'
-                });
-                document.body.appendChild(percentEl);
-                
-                // סימולציה של אחוזים עולים
-                let count = 0;
-                window.percentInterval = setInterval(() => {
-                    count = (count + 1) % 101;
-                    percentEl.innerText = count + '%';
-                }, 50);
-            } 
-            
-            // אם המשתמש ביטל את הצ'קבוקס - נסיר את האלמנט
-            if (!${show} && percentEl) {
-                percentEl.remove();
-                clearInterval(window.percentInterval);
+            if (${show}) {
+                if (!percentEl) {
+                    percentEl = document.createElement('div');
+                    percentEl.id = 'dynamic-percent';
+                    
+                    // עיצוב דינמי: מיקום בתחתית וצבע שמתאים ל-CSS המקורי
+                    Object.assign(percentEl.style, {
+                        position: 'fixed',
+                        bottom: '15px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        fontFamily: 'Segoe UI, sans-serif',
+                        zIndex: '9999',
+                        transition: 'all 0.3s ease',
+                        textShadow: '0 0 5px rgba(0,0,0,0.5)'
+                    });
+
+                    // ניסיון לדגום את הצבע של ה-loader (מחפש משתנה CSS או צבע border)
+                    const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() 
+                                         || '#00d4ff';
+                    percentEl.style.color = computedColor;
+
+                    document.body.appendChild(percentEl);
+                    
+                    let count = 0;
+                    window.percentInterval = setInterval(() => {
+                        count = (count + 1) % 101;
+                        percentEl.innerText = count + '%';
+                    }, 50);
+                }
+            } else {
+                if (percentEl) {
+                    percentEl.remove();
+                    clearInterval(window.percentInterval);
+                }
             }
         })();
     `;
 
     try {
-        // הרצת הקוד בתוך ה-iframe
+        // הרצה בתוך ה-iframe
         iframe.contentWindow.eval(injectCode);
     } catch (e) {
-        console.warn("לא ניתן להזריק קוד ל-iframe (אולי בגלל אבטחה/דומיין שונה)");
+        // גיבוי למקרה שה-eval חסום - ננסה דרך ה-URL
+        const url = new URL(iframe.src);
+        if (show) url.searchParams.set('showPercent', 'true');
+        else url.searchParams.delete('showPercent');
+        iframe.src = url.toString();
     }
 }
 
@@ -213,3 +223,4 @@ function updateLoader(name, checkbox) {
 </script>
 </body>
 </html>
+
