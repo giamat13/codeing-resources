@@ -2,130 +2,80 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספריית הטעינות שלי - GitHub Pages</title>
+    <title>Library Loaders + Percentage Control</title>
     <style>
-        :root {
-            --primary: #3498db;
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #ffffff;
-        }
-
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        
-        .loader-card {
-            background: var(--card);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #333;
-        }
-
-        .preview-window {
-            height: 150px;
-            background: #000;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* זה האלמנט שיציג את ה-HTML או ה-GIF */
-        .preview-frame { border: none; width: 100%; height: 100%; }
-        .preview-img { max-width: 80%; max-height: 80%; object-fit: contain; }
-
-        .controls { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f0f0f; color: white; text-align: center; padding: 20px; margin: 0; }
+        h1 { color: #eee; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; padding: 10px; }
+        .card { background: #1a1a1a; padding: 20px; border-radius: 18px; border: 1px solid #333; }
+        iframe { width: 100%; height: 200px; border: none; background: #050505; border-radius: 12px; }
+        .controls { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; text-align: right; font-size: 14px; }
         .row { display: flex; justify-content: space-between; align-items: center; }
-        
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        button { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-dl { background: #27ae60; }
-        .btn-op { background: #2980b9; }
+        button { flex: 1; padding: 12px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
+        .btn-dl { background: #27ae60; color: white; }
+        .btn-op { background: #2980b9; color: white; }
+        button:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
+    <h1>Library Loaders + Percentage Control</h1>
+    <div class="grid" id="grid"></div>
 
-    <h1 style="text-align: center;">Library Loaders</h1>
-    <div class="grid" id="mainGrid"></div>
+    <script>
+        var loaderNames = {
+            'spinner.html': 'ספינר קלאסי', 'dots.html': 'נקודות קופצות', 'bar.html': 'פס התקדמות',
+            'pulse.html': 'דופק מתרחב', 'square.html': 'ריבוע מתהפך', 'wave.html': 'גלי קול',
+            'orbit.html': 'מסלול כוכבים', 'ring.html': 'טבעות כפולות', 'grid.html': 'רשת מהבהבת',
+            'snake.html': 'נחש מעגלי', 'hourglass.html': 'שעון חול', 'blob.html': 'בועה נוזלית',
+            'atom.html': 'מודל אטומי'
+        };
 
-<script>
-    /* ב-GitHub Pages עליך לעדכן את הרשימה הזו ידנית בכל פעם שאתה מוסיף קובץ לתיקיית loaders.
-       סוג: 'html' או 'gif'
-    */
-    const loaders = [
-        { name: 'ספינר קלאסי', file: 'spinner.html', type: 'html' },
-        { name: 'טעינה צבעונית', file: 'rainbow.gif', type: 'gif' },
-        { name: 'נקודות קופצות', file: 'dots.html', type: 'html' }
-    ];
-
-    function init() {
-        const grid = document.getElementById('mainGrid');
+        var grid = document.getElementById('grid');
         
-        loaders.forEach((loader, index) => {
-            const path = `loaders/${loader.file}`;
-            const card = document.createElement('div');
-            card.className = 'loader-card';
-            
-            card.innerHTML = `
-                <div class="preview-window" id="prev-${index}">
-                    ${loader.type === 'html' 
-                        ? `<iframe class="preview-frame" src="${path}"></iframe>` 
-                        : `<img class="preview-img" src="${path}">`
-                    }
-                </div>
-                <h3>${loader.name}</h3>
-                <div class="controls">
-                    <div class="row">
-                        <label>צבע (HTML בלבד):</label>
-                        <input type="color" oninput="updateColor(${index}, this.value)">
-                    </div>
-                    <div class="row">
-                        <label>גודל:</label>
-                        <input type="range" min="20" max="150" value="60" oninput="updateSize(${index}, this.value)">
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn-dl" onclick="downloadFile('${path}')">הורדה</button>
-                    <button class="btn-op" onclick="window.open('${path}', '_blank')">פתיחה</button>
-                </div>
-            `;
+        Object.keys(loaderNames).forEach(function(file, i) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = '<iframe id="frame-' + i + '" src="loaders/' + file + '"></iframe>' +
+                '<h3 style="margin: 10px 0;">' + loaderNames[file] + '</h3>' +
+                '<div class="controls">' +
+                    '<div class="row"><label>צבע:</label><input type="color" id="col-' + i + '" value="#3498db" oninput="update(' + i + ', \'COLOR\', this.value)"></div>' +
+                    '<div class="row"><label>גודל:</label><input type="range" id="siz-' + i + '" min="40" max="150" value="80" oninput="update(' + i + ', \'SIZE\', this.value)"></div>' +
+                    '<div class="row"><label>מהירות:</label><input type="range" id="spe-' + i + '" min="0.1" max="3" step="0.1" value="1" oninput="update(' + i + ', \'SPEED\', this.value)"></div>' +
+                    '<div class="row"><label>הצג אחוזים:</label><input type="checkbox" id="perc-' + i + '" checked onchange="update(' + i + ', \'PERC\', this.checked)"></div>' +
+                '</div>' +
+                '<div class="btn-group">' +
+                    '<button class="btn-dl" onclick="applyAndDownload(\'' + file + '\', ' + i + ')">הורדה</button>' +
+                    '<button class="btn-op" onclick="window.open(\'loaders/' + file + '\')">מסך מלא</button>' +
+                '</div>';
             grid.appendChild(card);
         });
-    }
 
-    // פונקציות השליטה
-    function updateColor(index, color) {
-        const frame = document.querySelector(`#prev-${index} iframe`);
-        if (frame) {
-            // שולח הודעה לתוך ה-iframe כדי לשנות צבע (דורש שה-HTML ב-loaders יתמוך בזה)
-            frame.contentWindow.postMessage({ type: 'COLOR', value: color }, '*');
-            // גיבוי למקרה שה-HTML פשוט:
-            frame.style.filter = `hue-rotate(${Math.random() * 360}deg)`; 
+        function update(id, type, val) {
+            var frame = document.getElementById('frame-' + id);
+            if(frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: type, value: val }, '*');
+            }
         }
-    }
 
-    function updateSize(index, size) {
-        const target = document.querySelector(`#prev-${index} iframe, #prev-${index} img`);
-        if (target) {
-            target.style.width = size + 'px';
-            target.style.height = size + 'px';
+        function applyAndDownload(file, id) {
+            var frame = document.getElementById('frame-' + id);
+            var doc = frame.contentWindow.document;
+            var innerCSS = doc.head.querySelector('style').innerHTML;
+            var innerHTML = doc.body.innerHTML;
+            
+            var finalHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' +
+                'body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; font-family: sans-serif; overflow: hidden; }' +
+                innerCSS + '</style></head><body>' + innerHTML + '</body></html>';
+            
+            var blob = new Blob([finalHTML], { type: 'text/html' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'custom-' + file;
+            a.click();
+            URL.revokeObjectURL(url);
         }
-    }
-
-    function downloadFile(path) {
-        const a = document.createElement('a');
-        a.href = path;
-        a.download = path.split('/').pop();
-        a.click();
-    }
-
-    window.onload = init;
-</script>
+    </script>
 </body>
 </html>
