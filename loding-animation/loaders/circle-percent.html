@@ -12,7 +12,15 @@
             transform: rotate(-90deg); transform-origin: 50% 50%;
             transition: stroke-dashoffset 0.3s ease;
         }
-        .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: 700; color: #00d4ff; }
+        /* הסתרה ברירת מחדל של טקסט האחוזים */
+        .percentage-text { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 24px; font-weight: 700; color: #00d4ff; 
+            display: none; 
+        }
+        
+        /* הצגת הטקסט רק כשיש למעלה class מיוחד */
+        body.show-percent .percentage-text { display: block; }
     </style>
 </head>
 <body>
@@ -20,13 +28,23 @@
         <svg width="120" height="120"><circle cx="60" cy="60" r="54"></circle><circle cx="60" cy="60" r="54" class="progress-circle"></circle></svg>
         <div class="percentage-text">0%</div>
     </div>
+    
     <script>
+        // בדיקה אם הפרמטר קיים ב-URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('showPercent') === 'true') {
+            document.body.classList.add('show-percent');
+        }
+
         let val = 0;
         const circle = document.querySelector('.progress-circle');
         const text = document.querySelector('.percentage-text');
         const circumference = 2 * Math.PI * 54;
+        
         setInterval(() => {
             if(val < 100) val++;
+            else val = 0; // איפוס לצורך הדגמה בלתי נגמרת
+            
             const offset = circumference - (val / 100) * circumference;
             circle.style.strokeDashoffset = offset;
             text.textContent = val + '%';
