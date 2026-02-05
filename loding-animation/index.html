@@ -3,155 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספריית אנימציות טעינה</title>
+    <title>ספריית הטעינות שלי - GitHub Pages</title>
     <style>
         :root {
-            --bg-dark: #0a0e27;
-            --bg-card: #141b3d;
-            --accent: #00d4ff;
+            --primary: #3498db;
+            --bg: #121212;
+            --card: #1e1e1e;
             --text: #ffffff;
-            --text-dim: #a0a9d4;
         }
 
-        body {
-            font-family: 'Segoe UI', 'Heebo', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text);
-            margin: 0;
-            padding: 2rem;
-        }
-
-        header { text-align: center; margin-bottom: 3rem; }
-        h1 { color: var(--accent); font-size: 2.5rem; margin: 0; }
-        p { color: var(--text-dim); }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
         .loader-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 1.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--card);
+            border-radius: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            border: 1px solid #333;
         }
 
-        .preview-container {
+        .preview-window {
+            height: 150px;
             background: #000;
-            height: 180px;
             border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
+        /* זה האלמנט שיציג את ה-HTML או ה-GIF */
+        .preview-frame { border: none; width: 100%; height: 100%; }
+        .preview-img { max-width: 80%; max-height: 80%; object-fit: contain; }
 
-        .card-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .loader-name {
-            font-weight: bold;
-            text-transform: capitalize;
-            color: var(--text);
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            cursor: pointer;
-        }
-
-        .copy-btn {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-            width: 100%;
-        }
-
-        .copy-btn:hover {
-            background: var(--accent);
-            color: var(--bg-dark);
-        }
+        .controls { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+        .row { display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-dl { background: #27ae60; }
+        .btn-op { background: #2980b9; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Loader Library</h1>
-    <p>אוסף אנימציות בקבצים נפרדים</p>
-</header>
-
-<div class="grid" id="loaders-grid"></div>
+    <h1 style="text-align: center;">Library Loaders</h1>
+    <div class="grid" id="mainGrid"></div>
 
 <script>
-    const loadersList = ['circular', 'dots', 'pulse']; // הוסף כאן את השאר
+    /* ב-GitHub Pages עליך לעדכן את הרשימה הזו ידנית בכל פעם שאתה מוסיף קובץ לתיקיית loaders.
+       סוג: 'html' או 'gif'
+    */
+    const loaders = [
+        { name: 'ספינר קלאסי', file: 'spinner.html', type: 'html' },
+        { name: 'טעינה צבעונית', file: 'rainbow.gif', type: 'gif' },
+        { name: 'נקודות קופצות', file: 'dots.html', type: 'html' }
+    ];
 
     function init() {
-        const grid = document.getElementById('loaders-grid');
+        const grid = document.getElementById('mainGrid');
         
-        loadersList.forEach(name => {
-            const fileName = `${name}.html`;
+        loaders.forEach((loader, index) => {
+            const path = `loaders/${loader.file}`;
             const card = document.createElement('div');
             card.className = 'loader-card';
             
             card.innerHTML = `
-                <div class="preview-container">
-                    <iframe src="loaders/${fileName}" id="frame-${name}"></iframe>
+                <div class="preview-window" id="prev-${index}">
+                    ${loader.type === 'html' 
+                        ? `<iframe class="preview-frame" src="${path}"></iframe>` 
+                        : `<img class="preview-img" src="${path}">`
+                    }
                 </div>
-                <div class="card-info">
-                    <span class="loader-name">${name.replace(/-/g, ' ')}</span>
-                    <label class="controls">
-                        <input type="checkbox" onchange="updateLoader('${name}', this)"> אחוזים
-                    </label>
+                <h3>${loader.name}</h3>
+                <div class="controls">
+                    <div class="row">
+                        <label>צבע (HTML בלבד):</label>
+                        <input type="color" oninput="updateColor(${index}, this.value)">
+                    </div>
+                    <div class="row">
+                        <label>גודל:</label>
+                        <input type="range" min="20" max="150" value="60" oninput="updateSize(${index}, this.value)">
+                    </div>
                 </div>
-                <button class="copy-btn" onclick="copyPath('loaders/${fileName}')">העתק נתיב קובץ</button>
+                <div class="btn-group">
+                    <button class="btn-dl" onclick="downloadFile('${path}')">הורדה</button>
+                    <button class="btn-op" onclick="window.open('${path}', '_blank')">פתיחה</button>
+                </div>
             `;
             grid.appendChild(card);
         });
     }
 
-    function updateLoader(name, checkbox) {
-        const iframe = document.getElementById(`frame-${name}`);
-        // שליחת הודעה לתוך ה-iframe
-        iframe.contentWindow.postMessage({
-            type: 'TOGGLE_PERCENT',
-            visible: checkbox.checked
-        }, '*');
+    // פונקציות השליטה
+    function updateColor(index, color) {
+        const frame = document.querySelector(`#prev-${index} iframe`);
+        if (frame) {
+            // שולח הודעה לתוך ה-iframe כדי לשנות צבע (דורש שה-HTML ב-loaders יתמוך בזה)
+            frame.contentWindow.postMessage({ type: 'COLOR', value: color }, '*');
+            // גיבוי למקרה שה-HTML פשוט:
+            frame.style.filter = `hue-rotate(${Math.random() * 360}deg)`; 
+        }
     }
 
-    function copyPath(path) {
-        navigator.clipboard.writeText(path);
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = '✓ הועתק';
-        setTimeout(() => btn.textContent = originalText, 2000);
+    function updateSize(index, size) {
+        const target = document.querySelector(`#prev-${index} iframe, #prev-${index} img`);
+        if (target) {
+            target.style.width = size + 'px';
+            target.style.height = size + 'px';
+        }
+    }
+
+    function downloadFile(path) {
+        const a = document.createElement('a');
+        a.href = path;
+        a.download = path.split('/').pop();
+        a.click();
     }
 
     window.onload = init;
 </script>
-
 </body>
 </html>
