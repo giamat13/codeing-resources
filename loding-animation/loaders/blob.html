@@ -1,0 +1,21 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:transparent;color:var(--c);font-family:sans-serif;overflow:hidden}
+    :root{--c:#3498db;--s:80px;--sp:1s}
+    .b{width:var(--s);height:var(--s);background:var(--c);border-radius:50%;animation:blobby calc(var(--sp)*2) infinite alternate} @keyframes blobby{0%{border-radius:50% 50% 50% 50%} 33%{border-radius:30% 70% 70% 30% / 50% 30% 70% 50%} 66%{border-radius:70% 30% 50% 50% / 30% 30% 70% 70%} 100%{border-radius:50% 50% 20% 80%}}
+    #perc-text{display:block;margin-top:10px;text-align:center;font-weight:bold;transition:0.2s}
+</style></head><body>
+    <div id="container" style="display:flex;flex-direction:column;align-items:center;position:relative">
+        <div class="b"></div>
+        <div id="perc-text">65%</div>
+    </div>
+<script>
+    window.onmessage = function(e) {
+        var r = document.documentElement;
+        var p = document.getElementById('perc-text');
+        if(!e.data) return;
+        if(e.data.type === 'COLOR') { r.style.setProperty('--c', e.data.value); if(p) p.style.color = e.data.value; }
+        if(e.data.type === 'SIZE') { r.style.setProperty('--s', e.data.value + 'px'); }
+        if(e.data.type === 'SPEED') { r.style.setProperty('--sp', e.data.value + 's'); }
+        if(e.data.type === 'PERC') { if(p) p.style.display = e.data.value ? 'block' : 'none'; }
+    };
+</script></body></html>
